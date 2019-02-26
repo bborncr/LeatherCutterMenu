@@ -32,3 +32,6 @@ Y Step | 6
 Z Step | 7
 Home | 11 (Z-)
 Stop | 12
+EncA | A0 (Abort)
+EncB | A1 (Hold)
+Select | A2 (Resume)
