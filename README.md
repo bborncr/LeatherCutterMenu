@@ -30,3 +30,5 @@ Z Direction | 4
 X Step | 5
 Y Step | 6
 Z Step | 7
+Home | 11 (Z-)
+Stop | 12

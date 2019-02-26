@@ -2,14 +2,14 @@
 #include <SpeedyStepper.h>
 #include <EEPROM.h>
 
-#define EN 8 // stepper motor enable, low level effective
+#define EN 8 // stepper motor enable, active low
 #define X_DIR 2 //X axis, stepper motor direction control
 #define Y_DIR 3 //y axis, stepper motor direction control
 #define Z_DIR 4 //zaxis, stepper motor direction control
 #define X_STP 5 //x axis, stepper motor control
 #define Y_STP 6 //y axis, stepper motor control
 #define Z_STP 7 //z axis, stepper motor control
-#define HOME_PIN 11 // Home limit switch
+#define HOME_PIN 11 // Home limit switch (Z- on the CNC board)
 #define STOP_BUTTON_PIN 12 //emergency stop
 
 SpeedyStepper stepperY;
@@ -195,6 +195,7 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
 }
 
 void executeJob() {
+  display(MD_Menu::DISP_L0, "Job");
   digitalWrite(EN, LOW); // Enable steppers
   JOB_COUNT = 1;
   JOB_STAGE = 1;
@@ -281,8 +282,8 @@ void setup(void)
 
   stepperY.setSpeedInStepsPerSecond(spd);
   stepperY.setAccelerationInStepsPerSecondPerSecond(accel);
-  stepperZ.setSpeedInStepsPerSecond(1000);
-  stepperZ.setAccelerationInStepsPerSecondPerSecond(1000);
+  stepperZ.setSpeedInStepsPerSecond(spd);
+  stepperZ.setAccelerationInStepsPerSecondPerSecond(accel);
   digitalWrite(EN, HIGH);
 
   pinMode(LED_PIN, OUTPUT);
