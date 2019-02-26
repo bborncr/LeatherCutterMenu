@@ -281,8 +281,8 @@ void setup(void)
 
   stepperY.setSpeedInStepsPerSecond(spd);
   stepperY.setAccelerationInStepsPerSecondPerSecond(accel);
-  stepperZ.setSpeedInStepsPerSecond(200);
-  stepperZ.setAccelerationInStepsPerSecondPerSecond(200);
+  stepperZ.setSpeedInStepsPerSecond(1000);
+  stepperZ.setAccelerationInStepsPerSecondPerSecond(1000);
   digitalWrite(EN, HIGH);
 
   pinMode(LED_PIN, OUTPUT);
