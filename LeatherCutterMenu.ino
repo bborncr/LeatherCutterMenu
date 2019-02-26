@@ -215,12 +215,28 @@ void executeJob() {
       }
     }
     if (JOB_STAGE == 1) {
-      if (stepperZ.moveToHomeInSteps(-1, 1000, 200, HOME_PIN) != true) {
+      display(MD_Menu::DISP_L1, "Homing...");
+      if (stepperZ.moveToHomeInSteps(-1, 100, 200, HOME_PIN) != true) {
         display(MD_Menu::DISP_L1, "Homing Error");
         while (true) {}
       }
       stepperZ.setCurrentPositionInSteps(0);
-      stepperZ.setupMoveInSteps(200);
+      stepperZ.setupMoveInSteps(100);
+      display(MD_Menu::DISP_L1, "Cutting...");
+      while (!stepperZ.motionComplete()) {
+        stepperZ.processMovement();
+        if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
+          stepperZ.setupStop();
+          stopFlag = true;
+          display(MD_Menu::DISP_L1, "Emergency Stop");
+          JOB_STAGE = 0;
+        }
+      }
+      if (JOB_STAGE > 0) {
+        JOB_STAGE = 2;
+      }
+    }
+    if (JOB_STAGE == 2) {
       stepperZ.setupMoveInSteps(20);
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
@@ -231,6 +247,9 @@ void executeJob() {
           JOB_STAGE = 0;
         }
       }
+    }
+    if (JOB_STAGE > 0) {
+      JOB_STAGE = 1;
     }
     JOB_COUNT++;
   }
@@ -262,8 +281,8 @@ void setup(void)
 
   stepperY.setSpeedInStepsPerSecond(spd);
   stepperY.setAccelerationInStepsPerSecondPerSecond(accel);
-  stepperZ.setSpeedInStepsPerSecond(spd);
-  stepperZ.setAccelerationInStepsPerSecondPerSecond(accel);
+  stepperZ.setSpeedInStepsPerSecond(200);
+  stepperZ.setAccelerationInStepsPerSecondPerSecond(200);
   digitalWrite(EN, HIGH);
 
   pinMode(LED_PIN, OUTPUT);
