@@ -16,7 +16,7 @@ The menu system uses the amazing Magic Designs' MD_Menu library for 2 line displ
 - EEPROM (Included in Arduino IDE)
 ## Connections
 - The Y axis is used to pull the leather and the Z axis for cutting
-- Note that the pinout of my Nano CNC Shield v4 was different from documentation I found online. I had to manually test the pins.
+- Note that the pinout of my Nano CNC Shield v4 was different from documentation found online. The step and direction pins were reversed.
 - The rotary encoder module is connected to pins A0, A1 with A2 being the select button (see Nav.cpp)
 - The i2c LCD display is on address 0x27 (see Disp.cpp)
 

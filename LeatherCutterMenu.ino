@@ -9,6 +9,7 @@
 #define X_STP 5 //x axis, stepper motor control
 #define Y_STP 6 //y axis, stepper motor control
 #define Z_STP 7 //z axis, stepper motor control
+#define STOP_BUTTON_PIN 12 //emergency stop
 
 SpeedyStepper stepperY;
 SpeedyStepper stepperZ;
@@ -54,6 +55,8 @@ int16_t spd = 1000;
 int16_t accel = 1000;
 uint8_t lngth = 20;
 uint8_t quantity = 10;
+uint8_t JOB_STAGE = 0; // Completed = 0
+uint8_t JOB_COUNT = 0;
 
 MD_Menu::value_t vBuf;  // interface buffer for values
 
@@ -82,7 +85,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
 
   // Job
   { 40, "Start", MD_Menu::MNU_INPUT, 40 },
-//  { 41, "Start Z",  MD_Menu::MNU_INPUT, 41 },
+  //  { 41, "Start Z",  MD_Menu::MNU_INPUT, 41 },
 
 };
 
@@ -95,7 +98,7 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { 14, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
 
   { 40, "Confirm", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
-//  { 41, "Start Z", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
+  //  { 41, "Start Z", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
 
 };
 
@@ -170,14 +173,8 @@ MD_Menu::value_t *myMotorCode(MD_Menu::mnuId_t id, bool bGet)
 // Value request callback for run code input
 // Only use the index here
 {
-  if (id == 40 && bGet == 0)
-  {
-    Serial.print(F("\nCutting..."));
-    for (int i = 0; i < quantity; i++) {
-      stepperY.moveRelativeInSteps((id == 40) * lngth * 100);
-      stepperZ.moveRelativeInSteps(100);
-      stepperZ.moveRelativeInSteps(-100);
-    }
+  if (id == 40 && bGet == 0) {
+    executeJob();
   }
   return (nullptr);
 }
@@ -196,6 +193,46 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
   return (nullptr);
 }
 
+void executeJob() {
+  digitalWrite(EN, LOW); // Enable steppers
+  JOB_COUNT = 1;
+  JOB_STAGE = 1;
+  bool stopFlag = false;
+  while (JOB_STAGE == 1 && JOB_COUNT <= quantity) {
+    stepperY.setCurrentPositionInSteps(0);
+    stepperY.setupMoveInSteps(lngth * 500);
+    char buf[11];
+    sprintf(buf, "%u of %u", JOB_COUNT, quantity);
+    display(MD_Menu::DISP_L1, buf);
+    while (!stepperY.motionComplete()) {
+      stepperY.processMovement();
+      if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
+        stepperY.setupStop();
+        stopFlag = true;
+        display(MD_Menu::DISP_L1, "Emergency Stop");
+        JOB_STAGE = 0;
+      }
+    }
+    if (JOB_STAGE == 1) {
+      stepperZ.setCurrentPositionInSteps(0);
+      stepperZ.setupMoveInSteps(200);
+      while (!stepperZ.motionComplete()) {
+        stepperZ.processMovement();
+        if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
+          stepperZ.setupStop();
+          stopFlag = true;
+          display(MD_Menu::DISP_L1, "Emergency Stop");
+          JOB_STAGE = 0;
+        }
+      }
+    }
+    JOB_COUNT++;
+  }
+  display(MD_Menu::DISP_L1, "Finished");
+  digitalWrite(EN, HIGH); // Disable steppers
+  delay(1000);
+}
+
 // Standard setup() and loop()
 void setup(void)
 {
@@ -212,7 +249,7 @@ void setup(void)
   pinMode(Y_DIR, OUTPUT); pinMode(Y_STP, OUTPUT);
   pinMode(Z_DIR, OUTPUT); pinMode(Z_STP, OUTPUT);
   pinMode(EN, OUTPUT);
-  digitalWrite(EN, LOW);
+  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
 
   stepperY.connectToPins(Y_STP, Y_DIR);
   stepperZ.connectToPins(Z_STP, Z_DIR);
@@ -221,6 +258,7 @@ void setup(void)
   stepperY.setAccelerationInStepsPerSecondPerSecond(accel);
   stepperZ.setSpeedInStepsPerSecond(spd);
   stepperZ.setAccelerationInStepsPerSecondPerSecond(accel);
+  digitalWrite(EN, HIGH);
 
   pinMode(LED_PIN, OUTPUT);
 
