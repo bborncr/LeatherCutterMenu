@@ -9,6 +9,7 @@
 #define X_STP 5 //x axis, stepper motor control
 #define Y_STP 6 //y axis, stepper motor control
 #define Z_STP 7 //z axis, stepper motor control
+#define HOME_PIN 11 // Home limit switch
 #define STOP_BUTTON_PIN 12 //emergency stop
 
 SpeedyStepper stepperY;
@@ -214,8 +215,13 @@ void executeJob() {
       }
     }
     if (JOB_STAGE == 1) {
+      if (stepperZ.moveToHomeInSteps(-1, 1000, 200, HOME_PIN) != true) {
+        display(MD_Menu::DISP_L1, "Homing Error");
+        while (true) {}
+      }
       stepperZ.setCurrentPositionInSteps(0);
       stepperZ.setupMoveInSteps(200);
+      stepperZ.setupMoveInSteps(20);
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
         if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
@@ -233,7 +239,6 @@ void executeJob() {
   delay(1000);
 }
 
-// Standard setup() and loop()
 void setup(void)
 {
   loadConfig();
@@ -249,6 +254,7 @@ void setup(void)
   pinMode(Y_DIR, OUTPUT); pinMode(Y_STP, OUTPUT);
   pinMode(Z_DIR, OUTPUT); pinMode(Z_STP, OUTPUT);
   pinMode(EN, OUTPUT);
+  pinMode(HOME_PIN, INPUT_PULLUP);
   pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
 
   stepperY.connectToPins(Y_STP, Y_DIR);
