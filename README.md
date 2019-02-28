@@ -39,12 +39,20 @@ Rotate changes the menu options, single click selects.
 Long click returns to previous menu.
 After 5 seconds the menu returns to the main menu.
 
-Speed (steps/sec): Max speed of both steppers
-Acceleration (steps/sec<sup>2</sup>): Acceleration of both steppers in steps pero second<sup>2</sup>
-Length: Target of length of strip in mm
-Quantity: Quantity of strips to cut
-Steps/mm: The quantity of steps required to extrude 1 mm
-Retract: The quantity of steps to retract after cutting (prevents sticking)
-Stroke: The length of the cut stroke in steps
-Save to EEPROM: Save settings to EEPROM
+### Speed (steps/sec)
+Max speed of both steppers
+### Acceleration (steps/sec<sup>2</sup>)
+Acceleration of both steppers in steps per second<sup>2</sup>
+### Length
+Target of length of strip in mm
+### Quantity
+Quantity of strips to cut
+### Steps/mm
+The quantity of steps required to extrude 1 mm
+### Retract
+The quantity of steps to retract after cutting (prevents sticking)
+### Stroke
+The length of the cut stroke in steps
+### Save to EEPROM
+Save settings to EEPROM
  
