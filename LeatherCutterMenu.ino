@@ -60,7 +60,7 @@ uint8_t quantity = 10;
 uint8_t JOB_STAGE = 0; // Completed = 0
 uint8_t JOB_COUNT = 0;
 uint8_t stepsMM = 10;
-uint8_t retract = 10;
+uint8_t retract = 5;
 
 MD_Menu::value_t vBuf;  // interface buffer for values
 
