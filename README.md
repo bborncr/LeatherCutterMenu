@@ -5,6 +5,8 @@ The menu system uses the amazing Magic Designs' MD_Menu library for 2 line displ
 - [Nano CNC Shield v4](https://www.crcibernetica.com/nano-cnc-shield-v4/)
 - [Arduino Nano](https://www.crcibernetica.com/nano-v3-0-ch340-chip-mini-usb-cable-nano/)
 - 2 x [8825 Stepstick Driver](https://www.crcibernetica.com/stepstick-8825-driver-for-ramps-1-4-boards/)
+- 1 x [microswitch](https://www.crcibernetica.com/search.php?search_query=microswitch) for homing the cutter
+- 1 x [momentary pushbutton](https://www.crcibernetica.com/search.php?search_query=momentary) as emergency stop
 - [i<sup>2</sup>c 16x2 LCD Display](https://www.crcibernetica.com/16x2-lcd-with-i2c-blue/)
 - [Rotary encoder with button select](https://www.crcibernetica.com/rotary-encoder-module/)
 - [12VDC 2A power supply](https://www.crcibernetica.com/12v-2a-power-supply-adapter/)
