@@ -16,7 +16,7 @@ SpeedyStepper stepperY;
 SpeedyStepper stepperZ;
 
 // ID of the settings block
-#define CONFIG_VERSION "v02"
+#define CONFIG_VERSION "v03"
 
 // Tell it where to store your config data in EEPROM
 #define CONFIG_START 32
@@ -27,14 +27,15 @@ struct StoreStruct {
   char version[4];
   // The variables of your settings (eg. settings.spd, settings.accel)
   int16_t spd, accel;
-  int8_t lngth, quantity, stepsMM;
+  int8_t lngth, quantity, stepsMM, retract;
 } settings = {
   CONFIG_VERSION,
   // The default values
   1000, 1000,
   100,
   10,
-  10
+  10,
+  5
 };
 
 void loadConfig() {
@@ -68,7 +69,7 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
   { 10, "Main Menu",      10, 11, 0 },
-  { 11, "Settings",   20, 25, 0 },
+  { 11, "Settings",   20, 26, 0 },
   { 12, "Job Menu",     40, 40, 0 },
 
 };
@@ -86,7 +87,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 22, "Length", MD_Menu::MNU_INPUT, 12 },
   { 23, "Quantity",    MD_Menu::MNU_INPUT, 13 },
   { 24, "Steps/mm",    MD_Menu::MNU_INPUT, 14 },
-  { 25, "Save to EEPROM",    MD_Menu::MNU_INPUT, 15 },
+  { 25, "Steps/mm",    MD_Menu::MNU_INPUT, 15 },
+  { 26, "Save to EEPROM",    MD_Menu::MNU_INPUT, 16 },
 
   // Job
   { 40, "Start", MD_Menu::MNU_INPUT, 40 },
@@ -100,7 +102,8 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { 12, "MM",       MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
   { 13, "QTY",      MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
   { 14, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
-  { 15, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
+  { 15, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
+  { 16, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
 
   { 40, "Confirm", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
 
@@ -175,6 +178,17 @@ MD_Menu::value_t *mnuIValueRqst(MD_Menu::mnuId_t id, bool bGet)
         Serial.print(stepsMM);
       }
       break;
+    case 15:
+      if (bGet)
+        vBuf.value = retract;
+      else
+      {
+        retract = vBuf.value;
+        settings.retract = retract;
+        Serial.print(F("\nRetract changed to "));
+        Serial.print(retract);
+      }
+      break;
 
     default:
       r = nullptr;
@@ -198,7 +212,7 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
 // Value request callback for run code input
 // Only use the index here
 {
-  if (id == 15 && bGet == 0) {
+  if (id == 16 && bGet == 0) {
 
     Serial.print(F("\nSaving settings to EEPROM"));
     saveConfig();
