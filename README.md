@@ -5,7 +5,7 @@ The menu system uses the amazing Magic Designs' MD_Menu library for 2 line displ
 - Nano CNC Shield v4
 - Arduino Nano
 - 2 x 8825 Stepstick Driver
-- i2c 16x2 LCD Display
+- i<sup>2</sup>c 16x2 LCD Display
 - Rotary encoder with button select
 - 12VDC 2A power supply
 ## Libraries required
