@@ -65,12 +65,16 @@ bool display(MD_Menu::userDisplayAction_t action, char *msg)
       lcd.noCursor();
       memset(szLine, ' ', LCD_COLS);
       lcd.setCursor(0, 0);
+      lcd.print("CRCibernetica");
+      lcd.setCursor(0, 1);
       lcd.print("Click for Menu");
       break;
 
     case MD_Menu::DISP_CLEAR:
       lcd.clear();
       lcd.setCursor(0, 0);
+      lcd.print("CRCibernetica");
+      lcd.setCursor(0, 1);
       lcd.print("Click for Menu");
       break;
 

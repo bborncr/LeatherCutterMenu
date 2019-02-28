@@ -252,7 +252,7 @@ void executeJob() {
         while (true) {}
       }
       stepperZ.setCurrentPositionInSteps(0);
-      stepperZ.setupMoveInSteps(75);
+      stepperZ.setupMoveInSteps(90);    
       display(MD_Menu::DISP_L1, "Cutting...");
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
