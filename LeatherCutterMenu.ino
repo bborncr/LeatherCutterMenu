@@ -16,7 +16,7 @@ SpeedyStepper stepperY;
 SpeedyStepper stepperZ;
 
 // ID of the settings block
-#define CONFIG_VERSION "v01"
+#define CONFIG_VERSION "v02"
 
 // Tell it where to store your config data in EEPROM
 #define CONFIG_START 32
@@ -27,12 +27,13 @@ struct StoreStruct {
   char version[4];
   // The variables of your settings (eg. settings.spd, settings.accel)
   int16_t spd, accel;
-  int8_t lngth, quantity;
+  int8_t lngth, quantity, stepsMM;
 } settings = {
   CONFIG_VERSION,
   // The default values
   1000, 1000,
-  15,
+  100,
+  10,
   10
 };
 
@@ -54,18 +55,20 @@ void saveConfig() {
 // Global menu data and definitions
 int16_t spd = 1000;
 int16_t accel = 1000;
-uint8_t lngth = 20;
+uint8_t lngth = 100;
 uint8_t quantity = 10;
 uint8_t JOB_STAGE = 0; // Completed = 0
 uint8_t JOB_COUNT = 0;
+uint8_t stepsMM = 10;
+uint8_t retract = 10;
 
 MD_Menu::value_t vBuf;  // interface buffer for values
 
 // Menu Headers --------
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
-  { 10, "Main Menu",      10, 12, 0 },
-  { 11, "Settings",   20, 24, 0 },
+  { 10, "Main Menu",      10, 11, 0 },
+  { 11, "Settings",   20, 25, 0 },
   { 12, "Job Menu",     40, 40, 0 },
 
 };
@@ -82,11 +85,11 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 21, "Acceleration",    MD_Menu::MNU_INPUT, 11 },
   { 22, "Length", MD_Menu::MNU_INPUT, 12 },
   { 23, "Quantity",    MD_Menu::MNU_INPUT, 13 },
-  { 24, "Save to EEPROM",    MD_Menu::MNU_INPUT, 14 },
+  { 24, "Steps/mm",    MD_Menu::MNU_INPUT, 14 },
+  { 25, "Save to EEPROM",    MD_Menu::MNU_INPUT, 15 },
 
   // Job
   { 40, "Start", MD_Menu::MNU_INPUT, 40 },
-  //  { 41, "Start Z",  MD_Menu::MNU_INPUT, 41 },
 
 };
 
@@ -94,12 +97,12 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
 {
   { 10, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   -32768, 0, 32767, 0, 10, nullptr },
   { 11, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   -32768, 0, 32767, 0, 10, nullptr },
-  { 12, "CM",       MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
+  { 12, "MM",       MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
   { 13, "QTY",      MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
-  { 14, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
+  { 14, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
+  { 15, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
 
   { 40, "Confirm", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
-  //  { 41, "Start Z", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
 
 };
 
@@ -161,6 +164,17 @@ MD_Menu::value_t *mnuIValueRqst(MD_Menu::mnuId_t id, bool bGet)
         Serial.print(quantity);
       }
       break;
+    case 14:
+      if (bGet)
+        vBuf.value = stepsMM;
+      else
+      {
+        stepsMM = vBuf.value;
+        settings.stepsMM = stepsMM;
+        Serial.print(F("\nSteps/mm changed to "));
+        Serial.print(stepsMM);
+      }
+      break;
 
     default:
       r = nullptr;
@@ -184,7 +198,7 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
 // Value request callback for run code input
 // Only use the index here
 {
-  if (id == 14 && bGet == 0) {
+  if (id == 15 && bGet == 0) {
 
     Serial.print(F("\nSaving settings to EEPROM"));
     saveConfig();
@@ -202,7 +216,7 @@ void executeJob() {
   bool stopFlag = false;
   while (JOB_STAGE == 1 && JOB_COUNT <= quantity) {
     stepperY.setCurrentPositionInSteps(0);
-    stepperY.setupMoveInSteps(lngth * 500);
+    stepperY.setupMoveInSteps(lngth * stepsMM);
     char buf[11];
     sprintf(buf, "%u of %u", JOB_COUNT, quantity);
     display(MD_Menu::DISP_L1, buf);
@@ -217,12 +231,12 @@ void executeJob() {
     }
     if (JOB_STAGE == 1) {
       display(MD_Menu::DISP_L1, "Homing...");
-      if (stepperZ.moveToHomeInSteps(-1, 100, 200, HOME_PIN) != true) {
+      if (stepperZ.moveToHomeInSteps(-1, 500, 100, HOME_PIN) != true) {
         display(MD_Menu::DISP_L1, "Homing Error");
         while (true) {}
       }
       stepperZ.setCurrentPositionInSteps(0);
-      stepperZ.setupMoveInSteps(100);
+      stepperZ.setupMoveInSteps(75);
       display(MD_Menu::DISP_L1, "Cutting...");
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
@@ -238,11 +252,26 @@ void executeJob() {
       }
     }
     if (JOB_STAGE == 2) {
-      stepperZ.setupMoveInSteps(20);
+      stepperZ.setupMoveInSteps(5);
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
         if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
           stepperZ.setupStop();
+          stopFlag = true;
+          display(MD_Menu::DISP_L1, "Emergency Stop");
+          JOB_STAGE = 0;
+        }
+      }
+      if (JOB_STAGE > 0) {
+        JOB_STAGE = 3;
+      }
+    }
+    if (JOB_STAGE == 3) {
+      stepperY.setupRelativeMoveInSteps(-1 * retract);
+      while (!stepperY.motionComplete()) {
+        stepperY.processMovement();
+        if ((digitalRead(STOP_BUTTON_PIN) == LOW) && (stopFlag == false)) {
+          stepperY.setupStop();
           stopFlag = true;
           display(MD_Menu::DISP_L1, "Emergency Stop");
           JOB_STAGE = 0;
@@ -266,6 +295,7 @@ void setup(void)
   accel = settings.accel;
   lngth = settings.lngth;
   quantity = settings.quantity;
+  stepsMM = settings.stepsMM;
 
   Serial.begin(BAUD_RATE);
   Serial.print("\n[Debug]");
