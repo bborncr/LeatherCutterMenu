@@ -203,6 +203,7 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
     Serial.print(F("\nSaving settings to EEPROM"));
     saveConfig();
     display(MD_Menu::DISP_L1, "Saved to EEPROM");
+    delay(1000);
 
   }
 
