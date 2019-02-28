@@ -87,7 +87,7 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 22, "Length", MD_Menu::MNU_INPUT, 12 },
   { 23, "Quantity",    MD_Menu::MNU_INPUT, 13 },
   { 24, "Steps/mm",    MD_Menu::MNU_INPUT, 14 },
-  { 25, "Steps/mm",    MD_Menu::MNU_INPUT, 15 },
+  { 25, "Retract",    MD_Menu::MNU_INPUT, 15 },
   { 26, "Save to EEPROM",    MD_Menu::MNU_INPUT, 16 },
 
   // Job
