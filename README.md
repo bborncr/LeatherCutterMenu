@@ -35,28 +35,29 @@ EncA | A0 (Abort)
 EncB | A1 (Hold)
 Select | A2 (Resume)
 ## Menu Control
-Rotate changes the menu options, single click selects.
-Long click returns to previous menu.
+- Rotate changes the menu options
+- Single click selects
+- Long click returns to previous menu
 After 5 seconds the menu returns to the main menu.
-### Settings
-#### Speed (steps/sec)
+## Settings
+### Speed (steps/sec)
 Max speed of both steppers
-#### Acceleration (steps/sec<sup>2</sup>)
+### Acceleration (steps/sec<sup>2</sup>)
 Acceleration of both steppers in steps per second<sup>2</sup>
-#### Length
+### Length
 Target of length of strip in mm
-#### Quantity
+### Quantity
 Quantity of strips to cut
-#### Steps/mm
+### Steps/mm
 The quantity of steps required to extrude 1 mm
-#### Retract
+### Retract
 The quantity of steps to retract after cutting (prevents sticking)
-#### Stroke
+### Stroke
 The length of the cut stroke in steps
-#### Save to EEPROM
+### Save to EEPROM
 Save settings to EEPROM
-### Job
-#### Start
+## Job
+### Start
 Start cutting using the current settings
 
  
