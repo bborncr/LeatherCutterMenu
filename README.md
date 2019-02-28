@@ -19,7 +19,6 @@ The menu system uses the amazing Magic Designs' MD_Menu library for 2 line displ
 - Note that the pinout of my Nano CNC Shield v4 was different from documentation found online. The step and direction pins were reversed.
 - The rotary encoder module is connected to pins A0, A1 with A2 being the select button (see Nav.cpp)
 - The i2c LCD display is on address 0x27 (see Disp.cpp)
-
 ### Nano CNC Shield v4 pin definitions
 Function | Pin
 --- | ---
@@ -35,3 +34,17 @@ Stop | 12
 EncA | A0 (Abort)
 EncB | A1 (Hold)
 Select | A2 (Resume)
+## Menu and Settings
+Rotate changes the menu options, single click selects.
+Long click returns to previous menu.
+After 5 seconds the menu returns to the main menu.
+
+Speed (steps/sec): Max speed of both steppers
+Acceleration (steps/sec<sup>2</sup>): Acceleration of both steppers in steps pero second<sup>2</sup>
+Length: Target of length of strip in mm
+Quantity: Quantity of strips to cut
+Steps/mm: The quantity of steps required to extrude 1 mm
+Retract: The quantity of steps to retract after cutting (prevents sticking)
+Stroke: The length of the cut stroke in steps
+Save to EEPROM: Save settings to EEPROM
+ 

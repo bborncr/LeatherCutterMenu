@@ -16,7 +16,7 @@ SpeedyStepper stepperY;
 SpeedyStepper stepperZ;
 
 // ID of the settings block
-#define CONFIG_VERSION "v03"
+#define CONFIG_VERSION "v06"
 
 // Tell it where to store your config data in EEPROM
 #define CONFIG_START 32
@@ -27,15 +27,16 @@ struct StoreStruct {
   char version[4];
   // The variables of your settings (eg. settings.spd, settings.accel)
   int16_t spd, accel;
-  int8_t lngth, quantity, stepsMM, retract;
+  int8_t lngth, quantity, stepsMM, retract, stroke;
 } settings = {
   CONFIG_VERSION,
   // The default values
   1000, 1000,
-  100,
   10,
-  10,
-  5
+  5,
+  7,
+  15,
+  90
 };
 
 void loadConfig() {
@@ -56,12 +57,13 @@ void saveConfig() {
 // Global menu data and definitions
 int16_t spd = 1000;
 int16_t accel = 1000;
-uint8_t lngth = 100;
-uint8_t quantity = 10;
+uint8_t lngth = 10;
+uint8_t quantity = 5;
 uint8_t JOB_STAGE = 0; // Completed = 0
 uint8_t JOB_COUNT = 0;
-uint8_t stepsMM = 10;
-uint8_t retract = 5;
+uint8_t stepsMM = 7;
+uint8_t retract = 15;
+uint8_t stroke = 90;
 
 MD_Menu::value_t vBuf;  // interface buffer for values
 
@@ -69,7 +71,7 @@ MD_Menu::value_t vBuf;  // interface buffer for values
 const PROGMEM MD_Menu::mnuHeader_t mnuHdr[] =
 {
   { 10, "Main Menu",      10, 11, 0 },
-  { 11, "Settings",   20, 26, 0 },
+  { 11, "Settings",   20, 27, 0 },
   { 12, "Job Menu",     40, 40, 0 },
 
 };
@@ -88,7 +90,8 @@ const PROGMEM MD_Menu::mnuItem_t mnuItm[] =
   { 23, "Quantity",    MD_Menu::MNU_INPUT, 13 },
   { 24, "Steps/mm",    MD_Menu::MNU_INPUT, 14 },
   { 25, "Retract",    MD_Menu::MNU_INPUT, 15 },
-  { 26, "Save to EEPROM",    MD_Menu::MNU_INPUT, 16 },
+  { 26, "Stroke",    MD_Menu::MNU_INPUT, 16 },
+  { 27, "Save to EEPROM",    MD_Menu::MNU_INPUT, 17 },
 
   // Job
   { 40, "Start", MD_Menu::MNU_INPUT, 40 },
@@ -103,7 +106,8 @@ const PROGMEM MD_Menu::mnuInput_t mnuInp[] =
   { 13, "QTY",      MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
   { 14, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
   { 15, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
-  { 16, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
+  { 16, "Steps",    MD_Menu::INP_INT,   mnuIValueRqst, 4,   0, 0, 255, 0, 10, nullptr },
+  { 17, "Confirm",  MD_Menu::INP_RUN,   saveSettings,  0,   0, 0, 0, 0, 0, nullptr },
 
   { 40, "Confirm", MD_Menu::INP_RUN, myMotorCode, 0, 0, 0, 0, 0, 0, nullptr },
 
@@ -190,6 +194,18 @@ MD_Menu::value_t *mnuIValueRqst(MD_Menu::mnuId_t id, bool bGet)
       }
       break;
 
+    case 16:
+      if (bGet)
+        vBuf.value = stroke;
+      else
+      {
+        stroke = vBuf.value;
+        settings.stroke = stroke;
+        Serial.print(F("\nStroke changed to "));
+        Serial.print(stroke);
+      }
+      break;
+
     default:
       r = nullptr;
       break;
@@ -212,7 +228,7 @@ MD_Menu::value_t *saveSettings(MD_Menu::mnuId_t id, bool bGet)
 // Value request callback for run code input
 // Only use the index here
 {
-  if (id == 16 && bGet == 0) {
+  if (id == 17 && bGet == 0) {
 
     Serial.print(F("\nSaving settings to EEPROM"));
     saveConfig();
@@ -252,7 +268,7 @@ void executeJob() {
         while (true) {}
       }
       stepperZ.setCurrentPositionInSteps(0);
-      stepperZ.setupMoveInSteps(90);    
+      stepperZ.setupMoveInSteps(stroke);
       display(MD_Menu::DISP_L1, "Cutting...");
       while (!stepperZ.motionComplete()) {
         stepperZ.processMovement();
