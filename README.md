@@ -1,13 +1,14 @@
 # Simple Leather Cutter Machine
 A simple arduino based leather strip cutting machine.
 The menu system uses the amazing Magic Designs' MD_Menu library for 2 line displays. The library puts as much as possible in FLASH reducing RAM consumption. Settings are stored in EEPROM.
-## Hardware
-- Nano CNC Shield v4
-- Arduino Nano
-- 2 x 8825 Stepstick Driver
-- i<sup>2</sup>c 16x2 LCD Display
-- Rotary encoder with button select
-- 12VDC 2A power supply
+## Hardware (links are for Costa Rica only)
+- [Nano CNC Shield v4](https://www.crcibernetica.com/nano-cnc-shield-v4/)
+- [Arduino Nano](https://www.crcibernetica.com/nano-v3-0-ch340-chip-mini-usb-cable-nano/)
+- 2 x [8825 Stepstick Driver](https://www.crcibernetica.com/stepstick-8825-driver-for-ramps-1-4-boards/)
+- [i<sup>2</sup>c 16x2 LCD Display](https://www.crcibernetica.com/16x2-lcd-with-i2c-blue/)
+- [Rotary encoder with button select](https://www.crcibernetica.com/rotary-encoder-module/)
+- [12VDC 2A power supply](https://www.crcibernetica.com/12v-2a-power-supply-adapter/)
+- 2 x [Bipolar stepper motors](https://www.crcibernetica.com/stepper-motor-nema17/)
 ## Libraries required
 - MD_Menu (https://github.com/MajicDesigns/MD_Menu)
 - MD_REncoder (https://github.com/MajicDesigns/MD_REncoder)
